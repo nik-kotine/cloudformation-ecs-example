@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ECS Fargate con API CRUD (anime-api)"
+
+Parameters:
+  DockerImage:
+    Type: String
+    Default: "grazen/anime-api:latest"
+    Description: "Imagen de DockerHub con la API CRUD"
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: "VPC para ECS"
+
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: "Subnets publicas para ECS"
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: CrudApiCluster
+
+  CrudApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/crud-api
+      RetentionInDays: 1
+
+  CrudApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: crud-api-task
+      Cpu: "256"
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::624686339956:role/LabRole
+      TaskRoleArn: arn:aws:iam::624686339956:role/LabRole
+      ContainerDefinitions:
+        - Name: crud-api
+          Image: !Ref DockerImage
+          PortMappings:
+            - ContainerPort: 3000
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CrudApiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: crudapi
+          Environment:
+            - Name: HOST
+              Value: "0.0.0.0"
+
+  CrudApiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Permitir trafico HTTP"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+  CrudApiService:
+    Type: AWS::ECS::Service
+    DependsOn: CrudApiSecurityGroup
+    Properties:
+      Cluster: !Ref ECSCluster
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref CrudApiTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref Subnets
+          SecurityGroups:
+            - !Ref CrudApiSecurityGroup
+
+Outputs:
+  ServiceName:
+    Value: !Ref CrudApiService
+  ClusterName:
+    Value: !Ref ECSCluster

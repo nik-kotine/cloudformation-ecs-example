@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "DockerImage",
+    "ParameterValue": "grazen/anime-api:latest"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-0f6860bf88dcfa401"
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "subnet-02db132dde6f996a5"
+  }
+]
