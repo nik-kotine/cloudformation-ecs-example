@@ -4,16 +4,24 @@ Description: "ECS Fargate con API CRUD (anime-api)"
 Parameters:
   DockerImage:
     Type: String
-    Default: "grazen/anime-api:latest"
     Description: "Imagen de DockerHub con la API CRUD"
-
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: "VPC para ECS"
-
   Subnets:
     Type: List<AWS::EC2::Subnet::Id>
     Description: "Subnets publicas para ECS"
+  LabRoleArn:
+    Type: String
+    Description: "ARN of the role to be used as task execution role"
+  ContainerCpu:
+    Type: String
+    Description: "CPU to give the container"
+    Default: "256"
+  ContainerMemory:
+    Type: String
+    Description: "Memory to give the container"
+    Default: "512"
 
 Resources:
   ECSCluster:
@@ -31,13 +39,13 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: crud-api-task
-      Cpu: "256"
-      Memory: "512"
+      Cpu: !Ref ContainerCpu
+      Memory: !Ref ContainerMemory
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: arn:aws:iam::624686339956:role/LabRole
-      TaskRoleArn: arn:aws:iam::624686339956:role/LabRole
+      ExecutionRoleArn: !Ref LabRoleArn
+      TaskRoleArn: !Ref LabRoleArn
       ContainerDefinitions:
         - Name: crud-api
           Image: !Ref DockerImage
