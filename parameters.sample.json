@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "DockerImage",
+    "ParameterValue": "..."
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "..."
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "..."
+  },
+  {
+    "ParameterKey": "LabRoleArn",
+    "ParameterValue": "arn:aws:iam::...:role/LabRole"
+  }
+]
